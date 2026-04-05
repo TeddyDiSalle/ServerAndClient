@@ -1,4 +1,3 @@
-from asyncio.windows_events import NULL
 from socket import * 
 import threading
 import time
@@ -21,16 +20,16 @@ def process_client(client_socket, username):
 
             if str.startswith(message, "@"):
                 #Feature 2: one to one
-                targetUser = message[1, message.find(" ")] #finds and stores target user for direct message
-                if targetUser in username_socket:
-                    username_socket[targetUser].send(message[message.find(" "):].encode())
+                targetUser = message[1: message.find(" ")] #finds and stores target user for direct message
+                if targetUser in username_socket: #checks if target user is in the dict
+                    username_socket[targetUser].send(message[message.find(" ")+1:].encode()) #Sends the message excluding the @username to the target user
                 else:
-                    client_socket.send("Target user not found".encode())
+                    client_socket.send("Target user not found".encode()) #tells sender that user was not found
             
             else:
                 #Feature 1: Broadcast
-                for user, socket in username_socket:
-                    if username != user:
+                for user, socket in username_socket.items():
+                    if username != user: #for every user but the sender send the message
                      socket.send(message.encode())
     except:
         pass #do nothing
@@ -49,5 +48,6 @@ while True:   #always welcoming
     username_socket[username] = connectionSocket #Stores socket and username as a pair in dict
 
     client_thead = threading.Thread(target=process_client, args=(connectionSocket, username)) #Starts new thread for client
+    client_thead.start()
 
    
