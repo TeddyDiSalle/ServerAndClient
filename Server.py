@@ -2,8 +2,11 @@ from socket import *
 import threading
 import time
 
+import GLOBALVARIABLES
+
 serverPort = 12001
 serverSocket = socket(AF_INET,SOCK_STREAM) #creating a server side socket
+
 
 serverSocket.bind(('',serverPort))  # binds to all addresses available for local testing
 #serverSocket.bind(('192.168.0.35',serverPort)) #binds to one specific address for over the air
@@ -15,7 +18,7 @@ username_socket = {}
 def process_client(client_socket, username):
     try:
         while True:
-            message = client_socket.recv(1024).decode() #receives a message up to 1024 bytes from client, and decodes it
+            message = client_socket.recv(GLOBALVARIABLES.socketBytes).decode() #receives a message up to 1024 bytes from client, and decodes it
             if message == "": #if client exits or connection is lost break out of processing loop
                 break
 
@@ -40,12 +43,13 @@ def process_client(client_socket, username):
 
 
 print('The server is ready to receive')
+print('Server IP address is: ', gethostbyname(gethostname())) #prints the server's IP address for clients to connect
 while True:   #always welcoming
     connectionSocket, addr = serverSocket.accept()  #Makes a socket and stores address for incoming client
     
     connectionSocket.send("Enter username (no spaces)".encode()) #Requests client for username
 
-    username = connectionSocket.recv(1024).decode() #Receives username and decodes
+    username = connectionSocket.recv(GLOBALVARIABLES.socketBytes).decode() #Receives username and decodes
     username_socket[username] = connectionSocket #Stores socket and username as a pair in dict
 
     client_thead = threading.Thread(target=process_client, args=(connectionSocket, username)) #Starts new thread for client
