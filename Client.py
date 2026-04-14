@@ -26,14 +26,13 @@ def receive_messages(client_socket):
 
 
 def send_messages(client_socket):
-    while True:
-        message = input() #reads a message from user input
+    message = ""
+    while message != "exit": #if user types exit, end the sending thread
+        message = input("> ") #reads a message from user input
         client_socket.send(message.encode()) #encodes and sends the message to server
 
 import threading
 
-clientSocket = socket(AF_INET, SOCK_STREAM) #creates client side TCP socket
-clientSocket.connect((serverName,serverPort)) # initiates TCP connection
 receive_thread = threading.Thread(target=receive_messages, args=(clientSocket,)) #creates a thread for receiving messages from server
 send_thread = threading.Thread(target=send_messages, args=(clientSocket,)) #creates a thread for sending messages to server
 receive_thread.start() #starts the receiving thread
