@@ -22,14 +22,17 @@ def receive_messages(client_socket):
         message = client_socket.recv(GLOBALVARIABLES.socketBytes).decode() #receives a message up to 1024 bytes from server, and decodes it
         if message == "": #if connection is lost break out of processing loop
             break
+        print("\r", end="") #prints a carriage return to move the cursor to the beginning of the line for better formatting
         print('From Server: ', message) #prints the message from server
 
 
 def send_messages(client_socket):
     message = ""
-    while message != "exit": #if user types exit, end the sending thread
+    while message != GLOBALVARIABLES.exitKeyword: #if user types the exit, end the sending thread
         message = input("> ") #reads a message from user input
         client_socket.send(message.encode()) #encodes and sends the message to server
+
+    client_socket.close() #close socket when done sending messages
 
 import threading
 

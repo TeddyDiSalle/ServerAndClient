@@ -19,7 +19,7 @@ def process_client(client_socket, username):
     try:
         while True:
             message = client_socket.recv(GLOBALVARIABLES.socketBytes).decode() #receives a message up to 1024 bytes from client, and decodes it
-            if message == "": #if client exits or connection is lost break out of processing loop
+            if message == "" or message == GLOBALVARIABLES.exitKeyword: #if client exits or connection is lost break out of processing loop
                 break
 
             if str.startswith(message, "@"):
@@ -39,9 +39,11 @@ def process_client(client_socket, username):
     finally: #post processing and end client thread
         client_socket.close() #close socket
         del username_socket[username] #deletes socket and username from dict
-            #Broadcast to all users that a user has left
+
+        #Broadcast to all users that a user has left
         for user, socket in username_socket.items():
             socket.send((username + " has left the chat").encode())
+
         print(username + " has left the chat") #Prints to server console that a user has left
 
 
@@ -54,6 +56,8 @@ while True:   #always welcoming
 
     username = connectionSocket.recv(GLOBALVARIABLES.socketBytes).decode() #Receives username and decodes
     username_socket[username] = connectionSocket #Stores socket and username as a pair in dict
+
+    connectionSocket.send(( "Type:" + GLOBALVARIABLES.exitKeyword + " to leave the chat" ).encode()) #Requests client for username
 
     #Broadcast to all users that a new user has joined
     for user, socket in username_socket.items():
