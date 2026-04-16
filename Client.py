@@ -2,7 +2,8 @@
 import threading
 import GLOBALVARIABLES
 from socket import *
-serverName = "172.28.203.33"
+#serverName = "172.28.203.33"
+serverName = "127.0.0.1"  # localhost
 #"192.168.1.2"
 #'hostname'
 #server's IP address (preciselyIPv4)'servername'
@@ -23,7 +24,8 @@ def receive_messages(client_socket):
         if message == "": #if connection is lost break out of processing loop
             break
         print("\r", end="") #prints a carriage return to move the cursor to the beginning of the line for better formatting
-        print('From Server: ', message) #prints the message from server
+        print(message) #prints the message from server
+        print("> ", end="", flush=True)  # reprint the prompt
 
 
 def send_messages(client_socket):
@@ -34,7 +36,11 @@ def send_messages(client_socket):
 
     client_socket.close() #close socket when done sending messages
 
-import threading
+
+print(clientSocket.recv(GLOBALVARIABLES.socketBytes).decode())  # prints "Enter username" sent by server
+username = input("> ")
+clientSocket.send(username.encode())
+print(clientSocket.recv(GLOBALVARIABLES.socketBytes).decode())  # prints instruction on  how to exit
 
 receive_thread = threading.Thread(target=receive_messages, args=(clientSocket,)) #creates a thread for receiving messages from server
 send_thread = threading.Thread(target=send_messages, args=(clientSocket,)) #creates a thread for sending messages to server

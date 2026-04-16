@@ -1,7 +1,5 @@
 from socket import * 
 import threading
-import time
-
 import GLOBALVARIABLES
 
 serverPort = 12001
@@ -26,14 +24,14 @@ def process_client(client_socket, username):
                 #Feature 2: one to one
                 targetUser = message[1: message.find(" ")] #finds and stores target user for direct message
                 if targetUser in username_socket: #checks if target user is in the dict
-                    username_socket[targetUser].send("From " + username + ": " + message[message.find(" ")+1:].encode()) #Sends the message excluding the @username to the target user
+                    username_socket[targetUser].send((username + ": " + message[message.find(" ")+1:]).encode()) #Sends the message excluding the @username to the target user
                 else:
                     client_socket.send("Target user not found".encode()) #tells sender that user was not found
             else:
                 #Feature 1: Broadcast
                 for user, socket in username_socket.items():
                     if username != user: #for every user but the sender send the message
-                     socket.send(message.encode())
+                     socket.send((username + ": " + message).encode())
     except:
         pass #do nothing
     finally: #post processing and end client thread
@@ -41,8 +39,8 @@ def process_client(client_socket, username):
         del username_socket[username] #deletes socket and username from dict
 
         #Broadcast to all users that a user has left
-        for user, socket in username_socket.items():
-            socket.send((username + " has left the chat").encode())
+        for user, sock in username_socket.items():
+            sock.send((username + " has left the chat").encode())
 
         print(username + " has left the chat") #Prints to server console that a user has left
 
@@ -57,7 +55,7 @@ while True:   #always welcoming
     username = connectionSocket.recv(GLOBALVARIABLES.socketBytes).decode() #Receives username and decodes
     username_socket[username] = connectionSocket #Stores socket and username as a pair in dict
 
-    connectionSocket.send(( "Type:" + GLOBALVARIABLES.exitKeyword + " to leave the chat" ).encode()) #Requests client for username
+    connectionSocket.send(("Type:" + GLOBALVARIABLES.exitKeyword + " to leave the chat" ).encode()) #Requests client for username
 
     #Broadcast to all users that a new user has joined
     for user, socket in username_socket.items():
@@ -65,7 +63,7 @@ while True:   #always welcoming
             socket.send((username + " has joined the chat").encode())
     print(username + " has joined the chat with IP: " + addr[0]) #Prints to server console that a new user has joined, and their IP address
 
-    client_thead = threading.Thread(target=process_client, args=(connectionSocket, username)) #Starts new thread for client
-    client_thead.start()
+    client_thread = threading.Thread(target=process_client, args=(connectionSocket, username)) #Starts new thread for client
+    client_thread.start()
 
    
