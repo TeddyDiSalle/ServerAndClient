@@ -1,10 +1,12 @@
 from socket import * 
 import threading
 import GLOBALVARIABLES
+import time
+import random
 
 serverPort = 12001
 serverSocket = socket(AF_INET,SOCK_STREAM) #creating a server side socket
-
+ENABLE_DELAY = GLOBALVARIABLES.DELAY; #Toggle for simulating delay adjust in GLOBALVARIABLES.py for toggling delay on and off
 
 serverSocket.bind(('',serverPort))  # binds to all addresses available for local testing
 #serverSocket.bind(('192.168.0.35',serverPort)) #binds to one specific address for over the air
@@ -19,6 +21,9 @@ def process_client(client_socket, username):
             message = client_socket.recv(GLOBALVARIABLES.socketBytes).decode() #receives a message up to 1024 bytes from client, and decodes it
             if message == "" or message == GLOBALVARIABLES.exitKeyword: #if client exits or connection is lost break out of processing loop
                 break
+            if ENABLE_DELAY:
+                delay = random.uniform(0.1, 1.0)  # Choose random delay from 100ms to 1000ms
+                time.sleep(delay) # simulate delay by sleeping
 
             if str.startswith(message, "@"):
                 #Feature 2: one to one
