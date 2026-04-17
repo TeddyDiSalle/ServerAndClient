@@ -19,8 +19,7 @@ def process_client(client_socket, username):
     try:
         while True:
             message = client_socket.recv(GLOBALVARIABLES.socketBytes).decode() #receives a message up to 1024 bytes from client, and decodes it
-            if message == "" or message == GLOBALVARIABLES.exitKeyword: #if client exits or connection is lost break out of processing loop
-                break
+
             if ENABLE_DELAY:
                 delay = random.uniform(0.1, 1.0)  # Choose random delay from 100ms to 1000ms
                 time.sleep(delay) # simulate delay by sleeping
@@ -31,6 +30,11 @@ def process_client(client_socket, username):
                 timestamp = None
                 actual_message = message
 
+            actual_message = actual_message.strip()
+
+            if actual_message == "" or actual_message == GLOBALVARIABLES.exitKeyword: #if client exits or connection is lost break out of processing loop
+                break
+            
             if actual_message.startswith("@"):
                 #Feature 2: one to one
                 targetUser = actual_message[1: actual_message.find(" ")] #Find and store target user
@@ -41,9 +45,9 @@ def process_client(client_socket, username):
                     else:
                         formatted = username + ": " + actual_message[actual_message.find(" ")+1:]
 
-                    username_socket[targetUser].send(formatted.encode())
+                    username_socket[targetUser].send((formatted + "\n").encode())
                 else:
-                    client_socket.send("Target user not found".encode())
+                    client_socket.send("Target user not found\n".encode())
 
             else:
                 #Feature 1: Broadcast
@@ -54,7 +58,7 @@ def process_client(client_socket, username):
                         else:
                             formatted = username + ": " + actual_message
 
-                        socket.send(formatted.encode())
+                        socket.send((formatted + "\n").encode())
     except:
         pass #do nothing
     finally: #post processing and end client thread
@@ -63,7 +67,7 @@ def process_client(client_socket, username):
 
         #Broadcast to all users that a user has left
         for user, sock in username_socket.items():
-            sock.send((username + " has left the chat").encode())
+            sock.send((username + " has left the chat\n").encode())
 
         print(username + " has left the chat") #Prints to server console that a user has left
 
@@ -78,12 +82,12 @@ while True:   #always welcoming
     username = connectionSocket.recv(GLOBALVARIABLES.socketBytes).decode() #Receives username and decodes
     username_socket[username] = connectionSocket #Stores socket and username as a pair in dict
 
-    connectionSocket.send(("Type:" + GLOBALVARIABLES.exitKeyword + " to leave the chat" ).encode()) #Requests client for username
+    connectionSocket.send(("Type:" + GLOBALVARIABLES.exitKeyword + " to leave the chat\n" ).encode()) #Requests client for username
 
     #Broadcast to all users that a new user has joined
     for user, socket in username_socket.items():
         if username != user: #for every user but the new user send the message
-            socket.send((username + " has joined the chat").encode())
+            socket.send((username + " has joined the chat\n").encode())
     print(username + " has joined the chat with IP: " + addr[0]) #Prints to server console that a new user has joined, and their IP address
 
     client_thread = threading.Thread(target=process_client, args=(connectionSocket, username)) #Starts new thread for client

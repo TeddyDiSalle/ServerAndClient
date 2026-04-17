@@ -23,26 +23,35 @@ ENABLE_DELAY = GLOBALVARIABLES.DELAY;
 
 def receive_messages(client_socket):
     latencies = []
+    buffer = ""
     while True:
         message = client_socket.recv(GLOBALVARIABLES.socketBytes).decode() #receives a message up to 1024 bytes from server, and decodes it
         if message == "": #if connection is lost break out of processing loop
             break
-        try:
-            received_time = time.time()
-            timestamp, msg = message.split("|", 1)
-            sent_time = float(timestamp)
-            latency = received_time - sent_time
-            latencies.append(latency)
+        buffer += message  
 
-            print("\r", end="")
-            print(f"{msg} (delay: {latency:.3f} sec)")
+        while "\n" in buffer:  # ✅ process full messages only
+            message, buffer = buffer.split("\n", 1)
+            if ENABLE_DELAY:
+                try:
+                    received_time = time.time()
+                    timestamp, msg = message.split("|", 1)
+                    sent_time = float(timestamp)
+                    latency = received_time - sent_time
+                    latencies.append(latency)
 
-            #Running averages
-            avg = sum(latencies) / len(latencies)
-            print(f"[avg delay: {avg:.3f} sec]")
-        except:
-            print("\r", end="") #prints a carriage return to move the cursor to the beginning of the line for better formatting
-            print(message) #prints the message from server
+                    print("\r", end="")
+                    print(f"{msg} (delay: {latency:.3f} sec)")
+
+                    #Running averages
+                    avg = sum(latencies) / len(latencies)
+                    print(f"[avg delay: {avg:.3f} sec]")
+                except:
+                    print("\r", end="") #prints a carriage return to move the cursor to the beginning of the line for better formatting
+                    print(message) #prints the message from server
+            else:
+                print("\r", end="")
+                print(message)
             print("> ", end="", flush=True)  # reprint the prompt
 
 
@@ -53,7 +62,7 @@ def send_messages(client_socket):
         if ENABLE_DELAY:
             timestamp = time.time()
             message = f"{timestamp}|{message}"
-        client_socket.send(message.encode()) #encodes and sends the message to server
+        client_socket.send((message + "\n").encode()) #encodes and sends the message to server
 
     client_socket.close() #close socket when done sending messages
 
