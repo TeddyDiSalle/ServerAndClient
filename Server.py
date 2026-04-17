@@ -25,18 +25,36 @@ def process_client(client_socket, username):
                 delay = random.uniform(0.1, 1.0)  # Choose random delay from 100ms to 1000ms
                 time.sleep(delay) # simulate delay by sleeping
 
-            if str.startswith(message, "@"):
+            if "|" in message:
+                timestamp, actual_message = message.split("|", 1) #If we are simulating delay separate the timestamp and message
+            else:
+                timestamp = None
+                actual_message = message
+
+            if actual_message.startswith("@"):
                 #Feature 2: one to one
-                targetUser = message[1: message.find(" ")] #finds and stores target user for direct message
-                if targetUser in username_socket: #checks if target user is in the dict
-                    username_socket[targetUser].send((username + ": " + message[message.find(" ")+1:]).encode()) #Sends the message excluding the @username to the target user
+                targetUser = actual_message[1: actual_message.find(" ")] #Find and store target user
+
+                if targetUser in username_socket: #If target user exists, print in the correct format depending on whether you have simulated delay
+                    if timestamp:
+                        formatted = f"{timestamp}|{username}: {actual_message[actual_message.find(' ')+1:]}"
+                    else:
+                        formatted = username + ": " + actual_message[actual_message.find(" ")+1:]
+
+                    username_socket[targetUser].send(formatted.encode())
                 else:
-                    client_socket.send("Target user not found".encode()) #tells sender that user was not found
+                    client_socket.send("Target user not found".encode())
+
             else:
                 #Feature 1: Broadcast
-                for user, socket in username_socket.items():
-                    if username != user: #for every user but the sender send the message
-                     socket.send((username + ": " + message).encode())
+                for user, socket in username_socket.items(): #Broadcaste message in the correct format to everyone but the sender 
+                    if username != user:
+                        if timestamp:
+                            formatted = f"{timestamp}|{username}: {actual_message}"
+                        else:
+                            formatted = username + ": " + actual_message
+
+                        socket.send(formatted.encode())
     except:
         pass #do nothing
     finally: #post processing and end client thread
