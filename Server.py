@@ -8,9 +8,9 @@ serverPort = 12001
 serverSocket = socket(AF_INET,SOCK_STREAM) #creating a server side socket
 ENABLE_DELAY = GLOBALVARIABLES.DELAY; #Toggle for simulating delay adjust in GLOBALVARIABLES.py for toggling delay on and off
 
-serverSocket.bind(('',serverPort))  # binds to all addresses available for local testing
+#serverSocket.bind(('',serverPort))  # binds to all addresses available for local testing
 #serverSocket.bind(('192.168.0.35',serverPort)) #binds to one specific address for over the air
-#serverSocket.bind(('TEMP',serverPort)) #binds to one specific address for over the air hot spot
+serverSocket.bind(('172.20.10.6',serverPort)) #binds to one specific address for over the air hot spot
 serverSocket.listen(5) # server listens for up to 5 clients
 
 username_socket = {}

@@ -4,7 +4,7 @@ import GLOBALVARIABLES
 from socket import *
 import time
 #serverName = "172.28.203.33"
-serverName = "127.0.0.1"  # localhost
+#serverName = "127.0.0.1"  # localhost
 #"192.168.1.2"
 #'hostname'
 #server's IP address (preciselyIPv4)'servername'
@@ -12,6 +12,7 @@ serverName = "127.0.0.1"  # localhost
 #serverName = "10.128.236.24"
 #serverName = "172.27.56.158"
 #serverName = "192.168.194.219" #mobile hotspot IP
+serverName = "172.20.10.6"
 serverPort = 12001 #un-reserved port #
 
 clientSocket = socket(AF_INET, SOCK_STREAM) #creates client side TCP socket
