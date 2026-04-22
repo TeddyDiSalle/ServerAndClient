@@ -8,7 +8,7 @@ import time
 #"192.168.1.2"
 #'hostname'
 #server's IP address (preciselyIPv4)'servername'
-serverName = "192.168.1.84" #"172.20.10.6"
+serverName = "172.20.10.6"
 serverPort = 12001 #un-reserved port #
 
 clientSocket = socket(AF_INET, SOCK_STREAM) #creates client side TCP socket
