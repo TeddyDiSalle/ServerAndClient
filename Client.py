@@ -8,16 +8,12 @@ import time
 #"192.168.1.2"
 #'hostname'
 #server's IP address (preciselyIPv4)'servername'
-#serverName = "192.168.1.10"
-#serverName = "10.128.236.24"
-#serverName = "172.27.56.158"
-#serverName = "192.168.194.219" #mobile hotspot IP
-serverName = "172.20.10.6"
+serverName = "192.168.1.84" #"172.20.10.6"
 serverPort = 12001 #un-reserved port #
 
 clientSocket = socket(AF_INET, SOCK_STREAM) #creates client side TCP socket
 clientSocket.connect((serverName,serverPort)) # initiates TCP connection . After this line is executed, three-way handshake is performed and a
-
+EndConnection = False;
 # TCP connection is established
 
 ENABLE_DELAY = GLOBALVARIABLES.DELAY;
@@ -25,13 +21,13 @@ ENABLE_DELAY = GLOBALVARIABLES.DELAY;
 def receive_messages(client_socket):
     latencies = []
     buffer = ""
-    while True:
+    while not EndConnection:
         message = client_socket.recv(GLOBALVARIABLES.socketBytes).decode() #receives a message up to 1024 bytes from server, and decodes it
         if message == "": #if connection is lost break out of processing loop
             break
         buffer += message  
 
-        while "\n" in buffer:  # ✅ process full messages only
+        while "\n" in buffer:
             message, buffer = buffer.split("\n", 1)
             if ENABLE_DELAY:
                 try:
@@ -62,9 +58,11 @@ def send_messages(client_socket):
         message = input("> ") #reads a message from user input
         if ENABLE_DELAY:
             timestamp = time.time()
-            message = f"{timestamp}|{message}"
-        client_socket.send((message + "\n").encode()) #encodes and sends the message to server
+            client_socket.send((f"{timestamp}|{message}" +"\n").encode()) #encodes and sends the message to server       
+        else:
+            client_socket.send((message + "\n").encode()) #encodes and sends the message to server
 
+    EndConnection = True;
     client_socket.close() #close socket when done sending messages
 
 
